@@ -176,12 +176,12 @@ export async function singlefile(
     const res = path.posix.join(
       curBaseurl,
       path.posix.relative(distPath, fileParentPath),
-      src
+      src // 如果它是绝对路径，前面所有都将被截断
     )
     if (res.startsWith(curBaseurl)) {
       return res
     }
-    else throw new Error()
+    else throw new Error(`链接 {src} 无效"`)
   }
   /*@__NO_SIDE_EFFECTS__*/ function joinFilePath(url: string): string {
     return path.join(
@@ -449,6 +449,7 @@ export function initPluginSingleFile(config: InitSinglefileOptions): Initialized
   let baseUrl = '/'
   let distPath = 'dist/'
   let assetsPath = 'assets/'
+  const customSet = (typeof config.delFiles !== "boolean") && (config.delFiles !== undefined)
   const delFiles = config.delFiles === true ? new Set<string>() : (config.delFiles ?? new Set<string>())
   const assetsCaptured = new Map<string, string>()
   pluginSingleFile.config = () => {
@@ -475,9 +476,6 @@ export function initPluginSingleFile(config: InitSinglefileOptions): Initialized
         const ext = path.parse(fileName).ext.toLowerCase()
         if (ext === ".css") {
           assetsCaptured.set(fileName, file.source as string)
-          if (!ssg && (delFiles !== false)) {
-            delete bundle[fileName]
-          }
         }
         if (ext === ".html") {
           indexs.push(file)
@@ -485,22 +483,22 @@ export function initPluginSingleFile(config: InitSinglefileOptions): Initialized
       }
       else {
         assetsCaptured.set(fileName, file.code)
-        if (!ssg && (delFiles !== false)) {
-          delete bundle[fileName]
-        }
       }
     }
     if (!ssg) {
       for (const index of indexs) {
         const opt: SinglefileOptions = {
           ...config,
-          fileParentPath: path.posix.parse(path.posix.join(distPath, index.fileName)).dir,
+          fileParentPath: path.posix.parse(path.posix.join(distPath, index.fileName)).dir, // rolldown 提供的 index.fileName 不会包含 baseUrl
           distPath: distPath,
           baseUrl: baseUrl,
           delFiles: delFiles,
           assets: assetsCaptured
         }
           ; (bundle[index.fileName] as OutputAsset).source = await singlefile(index.source as string, opt)
+        if ((!customSet) && (!(delFiles === false))) {
+          [...delFiles].forEach((val) => delete bundle[path.posix.relative(distPath, val)])
+        }
       }
     }
   }
@@ -513,16 +511,21 @@ export function initPluginSingleFile(config: InitSinglefileOptions): Initialized
       fileParentPath: path.posix.join(distPath, path.posix.parse(route).dir.replace("/", "")),
       distPath: distPath,
       baseUrl: baseUrl,
-      delFiles:  delFiles,
+      delFiles: delFiles,
       assets: assetsCaptured
     }
     return await singlefile(renderedHTML as string, opt)
   }
   async function onFinished() {
-    if (!delFiles) return 
+    if (!delFiles) return
     await Promise.all([...delFiles].map((val) => fs.promises.unlink(val)))
-    if (((await fs.promises.readdir(path.join(distPath, assetsPath))).length === 0)) {
-      await fs.promises.rm(path.join(distPath, assetsPath))
+    try {
+      if (((await fs.promises.readdir(path.join(distPath, assetsPath))).length === 0)) {
+        await fs.promises.rm(path.join(distPath, assetsPath))
+      }
+    }
+    catch (err) {
+
     }
   }
   return {

@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "keywords": ["vite-plugin", "vite-ssg"],
+  "keywords": [
+    "vite-plugin",
+    "vite-ssg"
+  ],
   "exports": {
     "types": "./dist/lib/main.d.ts",
-    "default": "./dist/main.js"
+    "default": "./dist/singlefile.js"
   },
   "files": [
     "dist"
@@ -16,13 +19,13 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
+    "terser": "^5.48.0",
     "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "unplugin-dts": "^1.0.2"
   },
   "dependencies": {
-    "parse5": "^8.0.1",
-    "terser": "^5.48.0"
+    "parse5": "^8.0.1"
   },
   "peerDependencies": {
     "rolldown": "^1.1.1",

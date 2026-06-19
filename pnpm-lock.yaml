@@ -14,9 +14,6 @@ importers:
       rolldown:
         specifier: ^1.1.1
         version: 1.1.1
-      terser:
-        specifier: ^5.48.0
-        version: 5.48.0
       vite:
         specifier: '>=8.0.0'
         version: 8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(terser@5.48.0)(tsx@4.22.4)
@@ -24,6 +21,9 @@ importers:
       '@types/node':
         specifier: ^25.9.3
         version: 25.9.3
+      terser:
+        specifier: ^5.48.0
+        version: 5.48.0
       tsx:
         specifier: ^4.22.4
         version: 4.22.4
