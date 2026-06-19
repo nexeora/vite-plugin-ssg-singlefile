@@ -17,7 +17,7 @@ export default defineConfig({
     lib: {
       entry: './lib/main.ts',
       formats: ['es'],
-      fileName: 'singlefile',
+      fileName: 'main',
     },
   },
 })

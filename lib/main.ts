@@ -402,7 +402,7 @@ interface Initialized {
  * })
  * ```
  */
-export function initPluginSingleFile(config: InitSinglefileOptionsSSG): Initialized
+export function initPluginSingleFile(config?: InitSinglefileOptionsSSG): Initialized
 /**
  * 创建 vite 单文件内联插件，兼容 vite-ssg，需要 vite 8+。
  *
@@ -439,9 +439,9 @@ export function initPluginSingleFile(config: InitSinglefileOptionsSSG): Initiali
  * })
  * ```
  */
-export function initPluginSingleFile(config: InitSinglefileOptionsWithoutSSG): Plugin;
+export function initPluginSingleFile(config?: InitSinglefileOptionsWithoutSSG): Plugin;
 
-export function initPluginSingleFile(config: InitSinglefileOptions): Initialized | Plugin {
+export function initPluginSingleFile(config: InitSinglefileOptions = {}): Initialized | Plugin {
   const pluginSingleFile: Plugin = {
     name: "vite-plugin-ssg-singlefile",
     enforce: 'post'
@@ -512,8 +512,7 @@ export function initPluginSingleFile(config: InitSinglefileOptions): Initialized
       fileParentPath: path.posix.join(distPath, path.posix.parse(route).dir.replace("/", "")),
       distPath: distPath,
       baseUrl: baseUrl,
-      delFiles: delFiles,
-      assets: assetsCaptured
+      delFiles: delFiles
     }
     return await singlefile(renderedHTML as string, opt)
   }

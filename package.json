@@ -1,5 +1,5 @@
 {
-  "name": "vite-plugin-ssg-singlefile",
+  "name": "@nekaii/vite-plugin-ssg-singlefile",
   "private": false,
   "version": "0.1.0",
   "type": "module",
@@ -10,7 +10,7 @@
   ],
   "exports": {
     "types": "./dist/lib/main.d.ts",
-    "default": "./dist/singlefile.js"
+    "default": "./dist/main.js"
   },
   "files": [
     "dist"
@@ -23,7 +23,8 @@
     "terser": "^5.48.0",
     "tsx": "^4.22.4",
     "typescript": "~6.0.2",
-    "unplugin-dts": "^1.0.2"
+    "unplugin-dts": "^1.0.2",
+    "vite": "^8.0.16"
   },
   "dependencies": {
     "parse5": "^8.0.1"
