@@ -1,6 +1,8 @@
 # vite-plugin-ssg-singlefile
 
-[English](./README_EN.md)
+[English](./README_EN.md) | [GitHub](https://github.com/Nexeora/vite-plugin-ssg-singlefile)
+
+[![npm](https://img.shields.io/npm/v/@nekaii/vite-plugin-ssg-singlefile)](https://www.npmjs.com/package/@nekaii/vite-plugin-ssg-singlefile)
 
 将 Vite 构建产物中的 JS 与 CSS 内联到 HTML 中，生成自包含的 html 文件。兼容 [vite-ssg](https://github.com/vitejs/vite-ssg)，需要 Vite 8+。
 
