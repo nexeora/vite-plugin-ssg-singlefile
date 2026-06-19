@@ -176,8 +176,13 @@ export async function singlefile(
   /*@__NO_SIDE_EFFECTS__*/ function joinUrl(src: string): string {
     const res = path.posix.join(
       curBaseurl,
-      path.posix.relative(distPath, fileParentPath),
-      src // 如果它是绝对路径，前面所有都将被截断
+      path.posix.relative(
+        distPath,
+        path.posix.resolve(
+          '/' + path.posix.relative('.', fileParentPath),
+          src // 如果它是绝对路径，前面将被截断
+        ).replace('/', '')
+      )
     )
     if (res.startsWith(curBaseurl)) {
       return res
