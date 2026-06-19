@@ -2,7 +2,7 @@
 
 [English](./README_EN.md)
 
-将 Vite 构建产物中的 JS 与 CSS 内联到 HTML 中，生成自包含的单文件页面。兼容 [vite-ssg](https://github.com/vitejs/vite-ssg)，需要 Vite 8+。
+将 Vite 构建产物中的 JS 与 CSS 内联到 HTML 中，生成自包含的 html 文件。兼容 [vite-ssg](https://github.com/vitejs/vite-ssg)，需要 Vite 8+。
 
 ## 安装
 

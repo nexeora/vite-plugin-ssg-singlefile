@@ -75,7 +75,8 @@ export interface SinglefileOptions {
    * 是否将内联后的 `<script>` 标签移动至 `<body>` 底部。
    *
    * 仅对原本通过 `src` 属性引入、且不含 `sync` 属性的模块脚本生效。
-   * 这可以避免过大的脚本下载拖慢首屏渲染。
+   * 这可以让浏览器先解析并渲染页面内容，再读取并执行内联脚本，
+   * 超过2mb的内联脚本可能使搜索引擎蜘蛛截断在没有dom元素的位置影响SEO
    *
    * @default true
    */

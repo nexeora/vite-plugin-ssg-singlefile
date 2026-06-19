@@ -2,7 +2,7 @@
 
 [中文](./README.md)
 
-Inline JS and CSS from Vite build output into HTML to produce self-contained single-file pages. Compatible with [vite-ssg](https://github.com/vitejs/vite-ssg). Requires Vite 8+.
+Inline JS and CSS from Vite build output into HTML to produce self-contained pages. Compatible with [vite-ssg](https://github.com/vitejs/vite-ssg). Requires Vite 8+.
 
 ## Installation
 
