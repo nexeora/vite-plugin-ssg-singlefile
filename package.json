@@ -4,6 +4,7 @@
   "version": "0.1.2",
   "type": "module",
   "license": "MIT",
+  "repository": {"url": "https://github.com/nexeora/vite-plugin-ssg-singlefile"},
   "keywords": [
     "vite-plugin",
     "vite-ssg",
