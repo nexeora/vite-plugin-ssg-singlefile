@@ -4,11 +4,7 @@ import dts from 'unplugin-dts/vite'
 
 export default defineConfig({
   plugins: [
-    dts({
-      compilerOptions: {
-        verbatimModuleSyntax: false
-      }
-    })
+    dts()
   ],
   build: {
     minify: "terser",

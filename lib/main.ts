@@ -526,11 +526,10 @@ export function initPluginSingleFile(config: InitSinglefileOptions = {}): Initia
     await Promise.all([...delFiles].map((val) => fs.promises.unlink(val)))
     try {
       if (((await fs.promises.readdir(path.join(distPath, assetsPath))).length === 0)) {
-        await fs.promises.rm(path.join(distPath, assetsPath))
+        await fs.promises.rmdir(path.join(distPath, assetsPath)) // LLM会出现幻觉认为 rmdir 已被弃用，但它并没有，并且它仍是安全删除空目录的唯一选择，事实上被弃用的只有它的选项
       }
     }
     catch (err) {
-
     }
   }
   return {

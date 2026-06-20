@@ -1,8 +1,9 @@
 # vite-plugin-ssg-singlefile
 
-[中文](./README.md) | [GitHub](https://github.com/Nexeora/vite-plugin-ssg-singlefile)
+[中文](./README.md) | English
 
-[![npm](https://img.shields.io/npm/v/@nekaii/vite-plugin-ssg-singlefile)](https://www.npmjs.com/package/@nekaii/vite-plugin-ssg-singlefile)
+[![npm](https://img.shields.io/npm/v/@nekaii/vite-plugin-ssg-singlefile)](https://www.npmjs.com/package/@nekaii/vite-plugin-ssg-singlefile) [![GitHub](https://img.shields.io/badge/GitHub-View_on_GitHub-181717?logo=githube)](https://github.com/nexeora/vite-plugin-ssg-singlefile)
+
 
 Inline JS and CSS from Vite build output into HTML to produce self-contained pages. Compatible with [vite-ssg](https://github.com/vitejs/vite-ssg). Requires Vite 8+.
 

@@ -1,19 +1,25 @@
 {
   "name": "@nekaii/vite-plugin-ssg-singlefile",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "vite-plugin",
-    "vite-ssg"
+    "vite-ssg",
+    "inline",
+    "html",
+    "bundle",
+    "single"
   ],
   "exports": {
     "types": "./dist/lib/main.d.ts",
     "default": "./dist/main.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "README_*.md"
   ],
   "scripts": {
     "build": "tsc && vite build"
