@@ -6,6 +6,7 @@
  */
 
 import { parse, serialize, defaultTreeAdapter, html as p5Html, type DefaultTreeAdapterMap } from 'parse5'
+import { replaceWith } from "@parse5/tools"
 import { type Plugin } from 'vite'
 import { type OutputAsset } from 'rolldown';
 import path from 'node:path'
@@ -113,6 +114,17 @@ export interface SinglefileOptions {
    * 而不再从磁盘读取文件。这通常用于与 Vite 的 `generateBundle` 钩子配合。
    */
   assets?: Map<string, string>
+
+  /**
+   * 是否递归处理嵌套的 `<script>` 和 `<link>` 标签。
+   *
+   * - `'warn'`：检测到嵌套的内联目标时发出警告，但不进行内联（默认）。
+   * - `true`：递归内联所有嵌套的 `<script>` 和 `<link>` 标签，不发出警告。
+   * - `false`：不递归内联，也不发出警告。
+   *
+   * @default 'warn'
+   */
+  recursiveInline?: boolean | 'warn'
 }
 
 /**
@@ -121,8 +133,8 @@ export interface SinglefileOptions {
  * 该函数会解析传入的 HTML 文档，查找其中所有指向本地文件的
  * `<script src="...">` 和 `<link rel="stylesheet" href="...">` 标签，
  * 将对应文件的内容读取后直接嵌入到 HTML 中，从而实现完整的单文件输出。
- * 注意目前只会处理作为 `<head>` 和 `<body>` 的直接子节点的script 和 link 标签，
- * 而对于在 `<body>` 内部嵌套过深的 script 和 link 标签目前不会进行递归分析处理。
+ * 注意默认只会处理作为 `<head>` 和 `<body>` 的直接子节点的script 和 link 标签，
+ * 对于在 `<body>` 内部嵌套的 script 和 link 标签，可通过 {@link SinglefileOptions.recursiveInline} 选项控制递归处理行为。
  *
  * ## 参数
  *
@@ -161,6 +173,7 @@ export async function singlefile(
   const moveDownInlinedScriptTag: boolean = options.moveDownInlinedScriptTag ?? true
   const moveDownInlinedStyleTag: boolean = options.moveDownInlinedStyleTag ?? true
   const delFiles: boolean | Set<string> = options.delFiles ?? true
+  const recursiveInline: boolean | 'warn' = options.recursiveInline ?? 'warn'
   const byMap: boolean = options.assets !== undefined
   async function mayDelFile(filePath: string): Promise<void> {
     if (delFiles === true) {
@@ -187,7 +200,7 @@ export async function singlefile(
     if (res.startsWith(curBaseurl)) {
       return res
     }
-    else throw new Error(`链接 {src} 无效"`)
+    else throw new Error(`链接 ${src} 无效"`)
   }
   /*@__NO_SIDE_EFFECTS__*/ function joinFilePath(url: string): string {
     return path.join(
@@ -240,32 +253,39 @@ export async function singlefile(
 
   const elementList: { el: P5Element, idx: number }[] = []
 
-  async function process(el: P5Element, idx: number): Promise<void> {
+  async function process(el: P5Element, idx: number, depth: number = 0): Promise<void> {
     const tag = el.tagName;
-
+    let inlined = false
+    const shouldInline = depth === 0 || recursiveInline === true
+    const shouldWarn = depth > 0 && recursiveInline === 'warn'
 
     if (tag === "script") {
-      let text = ''
       const src = attr(el, "src")
       if (src && (!isExternalLink(src))) {
-        text = await popFile(src)
-        text = text.replace(/"?__VITE_PRELOAD__"?/g, "void 0").replace(/<(\/script>|!--)/g, "\\x3C$1").trim();
+        if (shouldInline) {
+          let text = await popFile(src)
+          text = text.replace(/"?__VITE_PRELOAD__"?/g, "void 0").replace(/<(\/script>|!--)/g, "\\x3C$1").trim();
 
-        defaultTreeAdapter.insertText(
-          el,
-          text
-        )
-        for (let i = el.attrs.length - 1; i >= 0; i--) {
-          if (el.attrs[i].name === "crossorigin" || el.attrs[i].name === 'src') {  // 删除所有 crossorigin 和 src
-            el.attrs.splice(i, 1);
+          defaultTreeAdapter.insertText(
+            el,
+            text
+          )
+          for (let i = el.attrs.length - 1; i >= 0; i--) {
+            if (el.attrs[i].name === "crossorigin" || el.attrs[i].name === 'src') {  // 删除所有 crossorigin 和 src
+              el.attrs.splice(i, 1);
+            }
           }
-        }
-        if ((!(attr(el, "sync") || (attr(el, "type") !== "module"))) && moveDownInlinedScriptTag) {
-          defaultTreeAdapter.detachNode(el)
-          elementList.push({ el, idx })
-        }
+          if ((!(attr(el, "sync") || (attr(el, "type") !== "module"))) && moveDownInlinedScriptTag && depth === 0) {
+            defaultTreeAdapter.detachNode(el)
+            elementList.push({ el, idx })
+          }
 
-        console.log(`inlined script: ${src}`)
+          inlined = true
+          console.info(`inlined script: ${src}`)
+        }
+        else if (shouldWarn) {
+          console.warn(`[vite-plugin-ssg-singlefile] Found nested <script src="${src}">. Set recursiveInline: true to inline it or set false to ignore this warning.`)
+        }
       }
       else if (src) {
         if (!allowExternalLink) throw Error(`Unallowed external link: ${src}`)
@@ -274,7 +294,6 @@ export async function singlefile(
     else if (tag === "link") {
       const rel = attr(el, "rel")?.toLowerCase();
       if (rel?.split(/\s+/).includes('stylesheet')) {
-        let text = ''
         const newStyleEl = defaultTreeAdapter.createElement(
           'style',
           p5Html.NS.HTML,
@@ -282,27 +301,41 @@ export async function singlefile(
         )
         const href = attr(el, "href")
         if (href && (!(isExternalLink(href)))) {
+          if (shouldInline) {
+            let text = await popFile(href)
+            text = text.replace(/@charset\s+["'][^"']*["']\s*;?\s*/i, "").trim();
 
-          text = await popFile(href)
-          text = text.replace(/@charset\s+["'][^"']*["']\s*;?\s*/i, "").trim();
+            defaultTreeAdapter.insertText(
+              newStyleEl,
+              text
+            )
+            if (moveDownInlinedStyleTag && depth === 0) {
+              defaultTreeAdapter.detachNode(el)
+              elementList.push({ el: newStyleEl, idx })
+            }
+            else {
+              replaceWith(el, newStyleEl)
+            }
 
-          defaultTreeAdapter.insertText(
-            newStyleEl,
-            text
-          )
-          defaultTreeAdapter.detachNode(el)
-          if (moveDownInlinedStyleTag) {
-            elementList.push({ el: newStyleEl, idx })
+            inlined = true
+            console.info(`inlined stylesheet: ${href}`)
           }
-          else {
-            defaultTreeAdapter.appendChild(head!, newStyleEl)
+          else if (shouldWarn) {
+            console.warn(`[vite-plugin-ssg-singlefile] Found nested <link rel="stylesheet" href="${href}">. Set recursiveInline: true to inline it or set false to ignore this warning.`)
           }
-          console.log(`inlined stylesheet: ${href}`)
         }
         else if (href) {
           if (!allowExternalLink) throw Error(`Unallowed external link: ${href}`)
         }
       }
+    }
+
+    if ((!inlined) && recursiveInline !== false && el.childNodes) {
+      await Promise.all(
+        el.childNodes.map(async (c: P5Node, childIdx: number) =>
+          isElement(c) ? process(c, childIdx, depth + 1) : void 0
+        )
+      );
     }
   }
 
