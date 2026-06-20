@@ -95,6 +95,7 @@ export default defineConfig({
 | `moveDownInlinedScriptTag` | `boolean` | `true` | 是否将内联后的 `<script>` 标签移动到 `<body>` 底部。将脚本置于 body 末尾可以让浏览器先读取到并渲染页面内容，再读取并执行内联脚本，同时避免超过2mb的内联脚本使搜索引擎蜘蛛截断在没有页面内容的位置，仅对不含 `sync` 属性的模块脚本生效 |
 | `moveDownInlinedStyleTag` | `boolean` | `true` | 是否将内联后的 `<style>` 标签移动到 `<body>` 底部。将非首屏样式置于 body 末尾可减少首屏关键路径的体积，但处理不当可能导致样式闪烁，可视情况关闭 |
 | `delFiles` | `boolean \| Set<string>` | `true` | 文件删除策略：`true` 立即删除，`false` 不删除，`Set` 收集路径交由调用方处理 |
+| `recursiveInline` | `boolean \| 'warn'` | `'warn'` | 是否递归内联 `<body>` 内部嵌套的 `<script>` 和 `<link>` 标签。`'warn'`：检测到嵌套时发出警告但不内联；`true`：递归内联所有嵌套标签；`false`：不递归内联也不发出警告 |
 | `assets` | `Map<string, string>` | — | 预捕获的资源映射表，提供后将跳过磁盘读取 |
 
 ## 工作原理

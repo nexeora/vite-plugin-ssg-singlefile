@@ -96,6 +96,7 @@ export default defineConfig({
 | `moveDownInlinedScriptTag` | `boolean` | `true` | Move inlined `<script>` tags to the end of `<body>`. Placing scripts at the end of body allows the browser to parse and render page content first, then execute inline scripts. Also prevents search engine crawlers from truncating at a position with no page content when inline scripts exceed 2MB. Only applies to module scripts without a `sync` attribute |
 | `moveDownInlinedStyleTag` | `boolean` | `true` | Move inlined `<style>` tags to the end of `<body>`. Placing non-critical styles at the end of body reduces the size of the critical rendering path, but may cause a flash of unstyled content if not handled carefully — can be disabled as needed |
 | `delFiles` | `boolean \| Set<string>` | `true` | File deletion strategy: `true` deletes immediately, `false` skips deletion, `Set` collects file paths for the caller to handle |
+| `recursiveInline` | `boolean \| 'warn'` | `'warn'` | Whether to recursively inline nested `<script>` and `<link>` tags inside `<body>`. `'warn'`: warn when nested tags are found but don't inline; `true`: recursively inline all nested tags; `false`: skip recursive inlining without warnings |
 | `assets` | `Map<string, string>` | — | Pre-captured asset map; when provided, skips disk reads |
 
 ## How It Works
